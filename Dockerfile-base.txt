@@ -1,0 +1,55 @@
+############################################################
+# Dockerfile to build Green Screens Ltd. base image
+############################################################
+
+# Use latest jboss/base-jdk:11 image as the base
+FROM openjdk
+
+MAINTAINER "Green Screens Ltd. <info@greenscreens.io>"
+
+ENV WILDFLY_VERSION 17.0.1.Final
+ENV WILDFLY_SHA1 d00c51332a9ba9734be74d8acc6cd7eb00e3320a
+ENV JBOSS_HOME /opt/wildfly
+
+USER root
+
+RUN yum update -y \
+    && yum install unzip -y  \
+    && yum upgrade -y
+
+RUN cd $HOME \
+    && curl -L -O https://download.jboss.org/wildfly/$WILDFLY_VERSION/servlet/wildfly-servlet-$WILDFLY_VERSION.tar.gz \
+    && sha1sum wildfly-servlet-$WILDFLY_VERSION.tar.gz | grep $WILDFLY_SHA1 \
+    && mkdir $JBOSS_HOME \
+    && cd $HOME \
+    && tar xf wildfly-servlet-$WILDFLY_VERSION.tar.gz \
+    && mv $HOME/wildfly-servlet-$WILDFLY_VERSION/* $JBOSS_HOME  \
+    && rm wildfly-servlet-$WILDFLY_VERSION.tar.gz  \
+    && useradd -m jboss \
+    && chown -R jboss:jboss ${JBOSS_HOME}  \
+    && chmod -R g+rw ${JBOSS_HOME}
+
+RUN cd $HOME \
+    && curl -L -o welcome-content.zip -O https://www.dropbox.com/s/a4vz8kphqcec8n8/welcome-content.zip?dl=1  \
+    && rm $JBOSS_HOME/welcome-content/* \
+    && unzip welcome-content.zip  -d $JBOSS_HOME/welcome-content  \
+    && rm welcome-content.zip
+
+RUN cd $HOME \
+    && curl -L -o 'run.sh' https://raw.githubusercontent.com/greenscreens-io/linux-docker/master/run.txt \
+    && mv $HOME/run.sh / \
+    && chown jboss:jboss /run.sh \
+    && chmod 777 /run.sh
+
+
+USER jboss
+
+# Ensure signals are forwarded to the JVM process correctly for graceful shutdown
+ENV LAUNCH_JBOSS_IN_BACKGROUND true
+ENV GREENSCREENS_CONTAINER DOCKER
+ENV GREENSCREENS_MULTICAST true
+
+# Expose the ports we're interested in
+EXPOSE 8080 8443 8843
+
+ENTRYPOINT ["/run.sh"]

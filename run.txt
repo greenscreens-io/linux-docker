@@ -1,0 +1,29 @@
+#!/bin/bash
+
+mkdir /tmp/wildfly
+sync
+
+
+OPTIONS="-server -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m";
+
+if [[ -n ${JVM_MEM} ]]; then
+    MS=$((JVM_MEM / 4));
+    OPTIONS="$OPTIONS -Xms${MS}m -Xmx${JVM_MEM}m ";
+else
+    OPTIONS="$OPTIONS -Xms2048m -Xmx6144m";
+fi
+
+OPTIONS="$OPTIONS -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true";
+
+if [[ -n ${LOC_ADDR} ]]; then
+    OPTIONS="$OPTIONS -Djgroups.bind_address=$LOC_ADDR";
+fi
+
+if [[ -n ${PUB_ADDR} ]]; then
+    OPTIONS="$OPTIONS -Djgroups.external_addr=$PUB_ADDR";
+fi
+
+export JAVA_OPTS=$OPTIONS;
+
+exec /opt/wildfly/bin/standalone.sh -b 0.0.0.0 
+

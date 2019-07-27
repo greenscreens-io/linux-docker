@@ -1,0 +1,26 @@
+############################################################
+# Dockerfile to build Green Screens Ltd. container images
+############################################################
+
+FROM greenscreens/service:base
+
+MAINTAINER "Green Screens Ltd. <info@greenscreens.io>"
+
+ENV DEPLOY_DIR /opt/wildfly/standalone/deployments
+
+RUN curl -L -o $DEPLOY_DIR/data.zip -O https://www.dropbox.com/s/97exwwfbnjkqvu5/preflight.zip?dl=1  \
+    && unzip $DEPLOY_DIR/data.zip  -d $DEPLOY_DIR  \
+    && rm $DEPLOY_DIR/data.zip
+
+USER jboss
+
+ENV LAUNCH_JBOSS_IN_BACKGROUND 1
+ENV GREENSCREENS_CONTAINER DOCKER
+ENV GREENSCREENS_MULTICAST true
+
+# 8843 is replacement for 843, flash policy service port 
+# create routing in firewall incoming from 843 to 8843
+
+EXPOSE 8080 8443 8843
+
+ENTRYPOINT ["/run.sh"]
