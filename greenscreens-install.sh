@@ -898,7 +898,7 @@ uninstall () {
 	sudo systemctl disable docker-greenscreens.service
 	sudo docker stop greenscreens
 	sudo docker rm greenscreens
-	sudo docker rmi greenscreens/service:v1
+		sudo docker rmi greenscreens/service:v1
 	sudo docker system prune
 }
 
