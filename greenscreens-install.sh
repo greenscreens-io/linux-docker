@@ -204,7 +204,7 @@ root_checking () {
 }
 
 #######################################
-# Convert string t olowercase
+# Convert string to lowercase
 # Globals:
 #   None
 # Arguments:
@@ -303,6 +303,15 @@ get_os_info () {
 	fi
 }
 
+#######################################
+# Check if OS kernel is supported
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
 check_os_info () {
 
 	echo "Kernel: ${KERNEL}";
@@ -359,11 +368,11 @@ check_kernel () {
 #######################################
 check_hardware () {
 
-  local TOTAL_MEMORY=0;
-  local CPU_CORES_NUMBER=0;
+	local TOTAL_MEMORY=0;
+	local CPU_CORES_NUMBER=0;
 	local AVAILABLE_DISK_SPACE=0;
 
-  AVAILABLE_DISK_SPACE=$(sudo df -m /  | tail -1 | awk '{ print $4 }');
+	AVAILABLE_DISK_SPACE=$(sudo df -m /  | tail -1 | awk '{ print $4 }');
 
 	if [ "${AVAILABLE_DISK_SPACE}" -lt "${DISK_REQUIREMENTS}" ]; then
 		echo "Minimal requirements are not met: need at least $DISK_REQUIREMENTS MB of free HDD space"
@@ -1008,8 +1017,8 @@ create_network () {
 	EXIST=$(sudo docker network ls | awk '{print $2;}' | grep -x "${DOCKER_NETWORK}");
 
 	if [[ -z $EXIST ]]; then
-	    echo "Creating network configuration...$DOCKER_NETWORK";
-      sudo docker network create --driver bridge "${DOCKER_NETWORK}";
+		echo "Creating network configuration...$DOCKER_NETWORK";
+		sudo docker network create --driver bridge "${DOCKER_NETWORK}";
 	fi
 
 	EXIST=$(sudo docker network ls | awk '{print $2;}' | grep -x "${DOCKER_NETWORK}");
@@ -1101,7 +1110,7 @@ remove_container () {
 # Download Dockerfile used to build images
 # Globals:
 #   INSTALL_PATH, DOCKER_LATEST_FILE,
-#   DOCKERFILES_URL, DOCKER_BASE_FILE
+#   DOCKER_BASE_FILE
 # Arguments:
 #   None
 # Returns:
@@ -1188,8 +1197,8 @@ install_image () {
 
 	echo "Installing docker images..."
 
-  local EXIST=0;
-  EXIST=$(image_exists "${DOCKER_IMAGE_NAME}" "base");
+	local EXIST=0;
+	EXIST=$(image_exists "${DOCKER_IMAGE_NAME}" "base");
 
 	if [[ -z ${EXIST} ]]; then
 		echo "Building base image...";
